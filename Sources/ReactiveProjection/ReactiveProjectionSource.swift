@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public typealias ProjectedValue<Value> = CurrentValueSubject<Value, Never>
+public typealias Projection<Value> = CurrentValueSubject<Value, Never>
 
 public protocol ReactiveProjectionSource {
     associatedtype ReactiveObject = Self

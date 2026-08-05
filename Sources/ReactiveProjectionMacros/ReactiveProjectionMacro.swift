@@ -44,10 +44,6 @@ public struct ReactiveProjectionMacro: MemberMacro {
 
         // MARK: - Stored properties
 
-        let itemDecl: DeclSyntax = """
-        \(raw: access)let item: \(raw: sourceTypeName)
-        """
-
         let cancellablesDecl: DeclSyntax = """
         private var cancellables = Set<AnyCancellable>()
         """
@@ -102,7 +98,7 @@ public struct ReactiveProjectionMacro: MemberMacro {
         }
         """
 
-        return [featureEnum, itemDecl, cancellablesDecl, initDecl, bindDecl]
+        return [featureEnum, cancellablesDecl, initDecl, bindDecl]
     }
 
     // MARK: - source: argument parsing
@@ -245,17 +241,6 @@ enum ReactiveProjectionDiagnostic: String, DiagnosticMessage {
 
     var severity: DiagnosticSeverity { .error }
 }
-
-//public struct ProjectedMacro: PeerMacro {
-//    public static func expansion(
-//        of node: AttributeSyntax,
-//        providingPeersOf declaration: some DeclSyntaxProtocol,
-//        in context: some MacroExpansionContext
-//    ) throws -> [DeclSyntax] {
-//        // Ничего не генерирует — маркер для сканера в ReactiveProjectionMacro.
-//        return []
-//    }
-//}
 
 @main
 struct ReactiveProjectionPlugin: CompilerPlugin {
