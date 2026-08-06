@@ -54,7 +54,7 @@ public struct ReactiveProjectionMacro: MemberMacro {
             .map { property -> String in
                 let transform = property.transformExpr ?? "{ $0 }"
                 return """
-                self.\(property.name) = ProjectedValue((\(transform))(item[keyPath: \(property.keyPathExpr)]))
+                self.\(property.name) = Projection((\(transform))(item[keyPath: \(property.keyPathExpr)]))
                 """
             }
             .joined(separator: "\n")
@@ -87,7 +87,7 @@ public struct ReactiveProjectionMacro: MemberMacro {
         let bindDecl: DeclSyntax = """
         private func bind<T>(
             _ publisher: some Publisher<T, Never>,
-            into keyPath: ReferenceWritableKeyPath<\(raw: classDecl.name.text), ProjectedValue<T>>
+            into keyPath: ReferenceWritableKeyPath<\(raw: classDecl.name.text), Projection<T>>
         ) {
             publisher
                 .receive(on: DispatchQueue.main)
