@@ -76,7 +76,6 @@ public struct ReactiveProjectionMacro: MemberMacro {
 
         let initDecl: DeclSyntax = """
         \(raw: access)init(item: \(raw: sourceTypeName), features: Set<Feature> = Feature.all) {
-            self.item = item
             \(raw: assignments)
             \(raw: bindings)
         }
