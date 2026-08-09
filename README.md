@@ -18,7 +18,6 @@ For example, a `Note` entity may be used by:
 Each consumer usually needs a slightly different representation of the same underlying model:
 
 - different properties,
-- different transformations,
 - different relationships,
 - different levels of detail.
 
@@ -29,8 +28,7 @@ ReactiveProjection introduces a dedicated layer between the model and consumers.
 A Projection owns:
 
 - reactive observation,
-- transformation logic,
-- composition of reactive sources.
+- transformation logic.
 
 The model remains responsible for persistence.
 The consumer remains responsible for deciding what it needs.
@@ -56,7 +54,7 @@ ReactiveProjection solves a different problem. A Projection represents a reusabl
 For example, multiple independent flows may consume the same `Note`:
 
 ```
-                    AGNote
+                      Note
                        |
           ---------------------------
           |                         |
@@ -82,17 +80,17 @@ let projection = NoteProjection(
 The Projection can describe many possible properties:
 
 ```swift
-@ReactiveProjection(source: AGNote.self)
+@ReactiveProjection(source: Note.self)
 final class NoteProjection {
-    @Projected(\AGNote.title, transform: { $0 ?? "" })
+    @Projected(\Note.title, transform: { $0 ?? "" })
     var title: ProjectedValue<String>
 
-    @Projected(\AGNote.contacts, transform: { contacts in
-        (contacts as? Set<AGContact>)?.compactMap {
+    @Projected(\Note.contacts, transform: { contacts in
+        (contacts as? Set<Contact>)?.compactMap {
             OutlineFactory.contact(for: $0)
         } ?? []
     })
-    var contacts: ProjectedValue<[OrganizerOutlineItem]>
+    var contacts: Projection<[OutlineItem]>
 }
 ```
 
@@ -119,7 +117,7 @@ ReactiveProjection does not define persistence rules. Any object capable of expo
 Projected properties use `ProjectedValue` to represent their current reactive state.
 
 ```swift
-public typealias ProjectedValue<Value> = CurrentValueSubject<Value, Never>
+public typealias Projection<Value> = CurrentValueSubject<Value, Never>
 ```
 
 A projected value provides:
@@ -132,9 +130,9 @@ A projected value provides:
 ReactiveProjection can work with `NSManagedObject` subclasses. Example:
 
 ```swift
-extension AGNote: ReactiveProjectionSource {
+extension Note: ReactiveProjectionSource {
     public func projection<Value>(
-        for keyPath: KeyPath<AGNote, Value>
+        for keyPath: KeyPath<Note, Value>
     ) -> AnyPublisher<Value, Never> {
         publisher(for: keyPath)
             .eraseToAnyPublisher()
@@ -149,7 +147,7 @@ The Projection does not depend on Core Data details. The Core Data object only p
 **Model:**
 
 ```swift
-class AGNote: NSManagedObject {
+class Note: NSManagedObject {
     @NSManaged var title: String?
     @NSManaged var contacts: NSSet?
 }
@@ -158,23 +156,23 @@ class AGNote: NSManagedObject {
 **Projection:**
 
 ```swift
-@ReactiveProjection(source: AGNote.self)
+@ReactiveProjection(source: Note.self)
 final class NoteProjection {
     @Projected(
-        \AGNote.title,
+        \Note.title,
         transform: { $0 ?? "" }
     )
-    var title: ProjectedValue<String>
+    var title: Projection<String>
 
     @Projected(
-        \AGNote.contacts,
+        \Note.contacts,
         transform: { (contacts: NSSet?) in
-            (contacts as? Set<AGContact>)?.compactMap {
+            (contacts as? Set<Contact>)?.compactMap {
                 OutlineFactory.contact(for: $0)
             } ?? []
         }
     )
-    var contacts: ProjectedValue<[OrganizerOutlineItem]>
+    var contacts: Projection<[OutlineItem]>
 }
 ```
 
